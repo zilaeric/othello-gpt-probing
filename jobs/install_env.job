@@ -1,8 +1,9 @@
 #!/bin/bash
 
-#SBATCH --gres=gpu:0
+#SBATCH --gres=gpu:1
 #SBATCH --job-name=InstallEnv
 #SBATCH --ntasks=1
+#SBATCH --partition=gpu_titanrtx_shared_course
 #SBATCH --cpus-per-task=3
 #SBATCH --time=00:45:00
 #SBATCH --mem=32000M
@@ -21,3 +22,9 @@ python -m ipykernel install --user --name othello --display-name "othello"
 mkdir -p ckpts/battery_othello
 
 python data/download_data.py
+
+unzip data/othello_championship.zip -d data/
+unzip data/othello_synthetic.zip -d data/
+
+rm data/othello_championship.zip
+rm data/othello_synthetic.zip
