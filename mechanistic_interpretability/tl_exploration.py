@@ -1,5 +1,5 @@
 # %%
-from tl_othello_utils import *
+from mech_interp_othello_utils import *
 # %%
 # train_dataset.vocab_size, train_dataset.block_size == (61, 59)
 # mconf = GPTConfig(61, 59, n_layer=8, n_head=8, n_embd=512)

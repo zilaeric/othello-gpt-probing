@@ -1,5 +1,5 @@
 # %%
-from tl_othello_utils import *
+from mech_interp_othello_utils import *
 # %%
 # %%
 import transformer_lens.utils as utils

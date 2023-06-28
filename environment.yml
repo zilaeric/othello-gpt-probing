@@ -361,3 +361,5 @@ dependencies:
   - zstd=1.4.5=h9ceee32_0
   - pip:
     - pgnparser==1.0
+    - git+https://github.com/neelnanda-io/TransformerLens.git
+    - circuitsvis
