@@ -82,6 +82,7 @@ dependencies:
   - future=0.18.2=py38_1
   - get_terminal_size=1.0.0=haa9412d_0
   - gevent=21.1.2=py38h27cfd23_1
+  - gdown
   - glib=2.68.1=h36276a3_0
   - glob2=0.7=pyhd3eb1b0_0
   - gmp=6.2.1=h2531618_2

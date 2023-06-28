@@ -1,0 +1,23 @@
+#!/bin/bash
+
+#SBATCH --gres=gpu:0
+#SBATCH --job-name=InstallEnv
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=3
+#SBATCH --time=00:45:00
+#SBATCH --mem=32000M
+#SBATCH --output=jobs/job_logs/install_env_%A.out
+
+module purge
+module load 2021
+module load Anaconda3/2021.05
+
+cd $HOME/othello-gpt-probing/
+conda env create -f environment.yml
+
+source activate othello
+
+python -m ipykernel install --user --name othello --display-name "othello"
+mkdir -p ckpts/battery_othello
+
+python data/download_data.py
