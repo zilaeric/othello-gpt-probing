@@ -3,6 +3,8 @@ jobs/job_logs
 data/othello_championship/
 data/othello_synthetic/
 wandb/
+mechanistic_interpretability/board_seqs_int.pth
+mechanistic_interpretability/board_seqs_string.pth
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

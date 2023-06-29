@@ -1,17 +1,22 @@
 ### Update 29/06/2023 ~ Instructions for running on LISA
 
-First, clone the repository and move to the corresponding directory by running:
+Clone the repository and move to the corresponding directory by running:
 ```
 git clone git@github.com:zilaeric/othello-gpt-probing.git
 cd othello-gpt-probing
 ```
 
-Next, install the dependencies and download the necessary data (takes ~15 minutes) by running:
+Install dependencies and download the necessary data (takes ~15 minutes) by running:
 ```
 sbatch jobs/install_env.job
 ```
 
-Next, login to your [WandB](https://wandb.ai/) by activating the environment and inserting the requested information after running:
+Tranform data to the neccessary format (takes ~10 minutes) by running:
+```
+sbatch jobs/transform_data.job
+```
+
+Login to your [WandB](https://wandb.ai/) by activating the environment and inserting the requested information when running:
 ```
 module purge
 module load 2021
