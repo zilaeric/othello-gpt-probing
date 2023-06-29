@@ -78,7 +78,7 @@ state_stack = torch.tensor(
 print(state_stack.shape)
 
 layer = args.layer
-batch_size = 256
+batch_size = 250
 lr = 1e-4
 wd = 0.01
 pos_start = 5
