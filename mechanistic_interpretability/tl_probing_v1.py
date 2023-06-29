@@ -2,7 +2,29 @@
 from mech_interp_othello_utils import *
 # %%
 # %%
+import transformer_lens
 import transformer_lens.utils as utils
+from transformer_lens.hook_points import (
+    HookedRootModule,
+    HookPoint,
+)  # Hooking utilities
+from transformer_lens import HookedTransformer, HookedTransformerConfig, FactoredMatrix, ActivationCache
+from fancy_einsum import einsum
+import einops
+import argparse
+
+parser = argparse.ArgumentParser(description='Train classification network')
+parser.add_argument('--layer',
+                    required=True,
+                    default=6,
+                    type=int)
+
+parser.add_argument('--place',
+                    required=True,
+                    default="hook_resid_post",
+                    type=str)
+
+args, _ = parser.parse_known_args()
 
 cfg = HookedTransformerConfig(
     n_layers=8,
@@ -24,13 +46,16 @@ sd = utils.download_file_from_hf(
 # champion_ship_sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "championship_model.pth")
 model.load_state_dict(sd)
 # %%
-plot_single_board(["D2", "C4"])
-plot_board_log_probs(to_string(["D2", "C4"]), model(torch.tensor(to_int(["D2", "C4"]))))
-plot_board(["D2", "C4"])
+# plot_single_board(["D2", "C4"])
+# plot_board_log_probs(to_string(["D2", "C4"]), model(torch.tensor(to_int(["D2", "C4"]))))
+# plot_board(["D2", "C4"])
 
-# %%
-board_seqs_int = torch.load("board_seqs_int.pth")
-board_seqs_string = torch.load("board_seqs_string.pth")
+# %% ORIGINAL SETUP
+# board_seqs_int = torch.load("board_seqs_int.pth")
+# board_seqs_string = torch.load("board_seqs_string.pth")
+# ALTERNATIVE SETUP
+board_seqs_int = torch.tensor(np.load("mechanistic_interpretability/board_seqs_int_small.npy"), dtype=torch.long)
+board_seqs_string = torch.tensor(np.load("mechanistic_interpretability/board_seqs_string_small.npy"), dtype=torch.long)
 # %%
 def seq_to_state_stack(str_moves):
     if isinstance(str_moves, torch.Tensor):
@@ -51,7 +76,7 @@ print(state_stack.shape)
 # %%
 
 # %%
-layer = 6
+layer = args.layer
 batch_size = 100
 lr = 1e-4
 wd = 0.01
@@ -62,10 +87,11 @@ options = 3
 rows = 8
 cols = 8
 num_epochs = 2
-num_games = 4500000
+num_games = 100000
 x = 0
 y = 2
-probe_name = "main_linear_probe"
+probe_place = args.place
+probe_name = f"linear_probe_{layer}_{probe_place}"
 # The first mode is blank or not, the second mode is next or prev GIVEN that it is not blank
 modes = 3
 alternating = torch.tensor([1 if i%2 == 0 else -1 for i in range(length)], device="cuda")
@@ -98,7 +124,7 @@ linear_probe.requires_grad = True
 optimiser = torch.optim.AdamW([linear_probe], lr=lr, betas=(0.9, 0.99), weight_decay=wd)
 
 # %%
-wandb.init(project="othello", name="linear-probe")
+#wandb.init(project="othello", name="linear-probe")
 # %%
 for epoch in range(num_epochs):
     full_train_indices = torch.randperm(num_games)
@@ -114,10 +140,10 @@ for epoch in range(num_epochs):
         state_stack_one_hot = state_stack_to_one_hot(state_stack).cuda()
         with torch.inference_mode():
             _, cache = model.run_with_cache(games_int.cuda()[:, :-1], return_type=None)
-            resid_post = cache["resid_post", layer][:, pos_start:pos_end]
+            probed_weights = cache[f"blocks.{layer}.{probe_place}"][:, pos_start:pos_end]
         probe_out = einsum(
             "batch pos d_model, modes d_model rows cols options -> modes batch pos rows cols options",
-            resid_post,
+            probed_weights,
             linear_probe,
         )
         # print(probe_out.shape)
@@ -140,6 +166,7 @@ for epoch in range(num_epochs):
 
         optimiser.step()
         optimiser.zero_grad()
-torch.save(linear_probe, f"{probe_name}.pth")
+
+torch.save(linear_probe, f"mechanistic_interpretability/{probe_name}.pth")
 # %%
 # %%
