@@ -13,6 +13,10 @@ from fancy_einsum import einsum
 import einops
 import argparse
 
+import wandb
+
+wandb.login()
+
 parser = argparse.ArgumentParser(description='Train classification network')
 parser.add_argument('--layer',
                     required=True,
@@ -124,7 +128,24 @@ linear_probe.requires_grad = True
 optimiser = torch.optim.AdamW([linear_probe], lr=lr, betas=(0.9, 0.99), weight_decay=wd)
 
 # %%
-#wandb.init(project="othello", name="linear-probe")
+wandb.init(
+    project="othello",
+    config={
+        "layer": layer,
+        "batch_size": batch_size,
+        "learning_rate": lr,
+        "wd": wd,
+        "pos_start": pos_start,
+        "pos_end": pos_end,
+        "length": length,
+        "options": options,
+        "rows": rows,
+        "cols": cols,
+        "epochs": num_epochs,
+        "games": num_games,
+        "probe_place": probe_place,
+    })
+
 # %%
 for epoch in range(num_epochs):
     full_train_indices = torch.randperm(num_games)
@@ -162,6 +183,9 @@ for epoch in range(num_epochs):
         loss_all = -probe_correct_log_probs[2, :].mean(0).sum()
         
         loss = loss_even + loss_odd + loss_all
+        
+        wandb.log({"loss": loss, "loss_even": loss_even, "loss_odd": loss_odd, "loss_all": loss_all})
+        
         loss.backward() # it's important to do a single backward pass for mysterious PyTorch reasons, so we add up the losses - it's per mode and per square.
 
         optimiser.step()

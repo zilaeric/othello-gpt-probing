@@ -360,7 +360,8 @@ dependencies:
   - zope.interface=5.3.0=py38h27cfd23_0
   - zstd=1.4.5=h9ceee32_0
   - pip:
-    - pgnparser==1.0
+    - circuitsvis
     - git+https://github.com/neelnanda-io/TransformerLens.git
     - git+https://github.com/neelnanda-io/neel-plotly.git
-    - circuitsvis
+    - pgnparser==1.0
+    - wandb
