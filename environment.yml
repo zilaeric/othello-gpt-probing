@@ -362,4 +362,5 @@ dependencies:
   - pip:
     - pgnparser==1.0
     - git+https://github.com/neelnanda-io/TransformerLens.git
+    - git+https://github.com/neelnanda-io/neel-plotly.git
     - circuitsvis

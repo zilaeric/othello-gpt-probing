@@ -1,3 +1,8 @@
+# OWN
+jobs/job_logs
+data/othello_championship/
+data/othello_synthetic/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
