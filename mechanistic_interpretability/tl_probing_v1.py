@@ -1,7 +1,5 @@
-# %%
 from mech_interp_othello_utils import *
-# %%
-# %%
+
 import transformer_lens
 import transformer_lens.utils as utils
 from transformer_lens.hook_points import (
@@ -49,18 +47,19 @@ sd = utils.download_file_from_hf(
 )
 # champion_ship_sd = utils.download_file_from_hf("NeelNanda/Othello-GPT-Transformer-Lens", "championship_model.pth")
 model.load_state_dict(sd)
-# %%
+
 # plot_single_board(["D2", "C4"])
 # plot_board_log_probs(to_string(["D2", "C4"]), model(torch.tensor(to_int(["D2", "C4"]))))
 # plot_board(["D2", "C4"])
 
-# %% ORIGINAL SETUP
-# board_seqs_int = torch.load("board_seqs_int.pth")
-# board_seqs_string = torch.load("board_seqs_string.pth")
-# ALTERNATIVE SETUP
-board_seqs_int = torch.tensor(np.load("mechanistic_interpretability/board_seqs_int_small.npy"), dtype=torch.long)
-board_seqs_string = torch.tensor(np.load("mechanistic_interpretability/board_seqs_string_small.npy"), dtype=torch.long)
-# %%
+# BIG SETUP
+board_seqs_int = torch.load("mechanistic_interpretability/board_seqs_int.pth")
+board_seqs_string = torch.load("mechanistic_interpretability/board_seqs_string.pth")
+
+# SMALL SETUP
+# board_seqs_int = torch.tensor(np.load("mechanistic_interpretability/board_seqs_int_small.npy"), dtype=torch.long)
+# board_seqs_string = torch.tensor(np.load("mechanistic_interpretability/board_seqs_string_small.npy"), dtype=torch.long)
+
 def seq_to_state_stack(str_moves):
     if isinstance(str_moves, torch.Tensor):
         str_moves = str_moves.tolist()
@@ -77,11 +76,9 @@ state_stack = torch.tensor(
     np.stack([seq_to_state_stack(seq) for seq in board_seqs_string[:50, :-1]])
 )
 print(state_stack.shape)
-# %%
 
-# %%
 layer = args.layer
-batch_size = 100
+batch_size = 256
 lr = 1e-4
 wd = 0.01
 pos_start = 5
@@ -91,11 +88,11 @@ options = 3
 rows = 8
 cols = 8
 num_epochs = 2
-num_games = 100000
+num_games = 4500000
 x = 0
 y = 2
 probe_place = args.place
-probe_name = f"linear_probe_{layer}_{probe_place}"
+probe_name = f"full_linear_probe_{layer}_{probe_place}"
 # The first mode is blank or not, the second mode is next or prev GIVEN that it is not blank
 modes = 3
 alternating = torch.tensor([1 if i%2 == 0 else -1 for i in range(length)], device="cuda")
@@ -120,14 +117,13 @@ state_stack_one_hot = state_stack_to_one_hot(state_stack)
 print(state_stack_one_hot.shape)
 print((state_stack_one_hot[:, 0, 17, 4:9, 2:5]))
 print((state_stack[0, 17, 4:9, 2:5]))
-# %%
+
 linear_probe = torch.randn(
     modes, model.cfg.d_model, rows, cols, options, requires_grad=False, device="cuda"
 )/np.sqrt(model.cfg.d_model)
 linear_probe.requires_grad = True
 optimiser = torch.optim.AdamW([linear_probe], lr=lr, betas=(0.9, 0.99), weight_decay=wd)
 
-# %%
 wandb.init(
     project="othello",
     name=probe_name,
@@ -147,7 +143,6 @@ wandb.init(
         "probe_place": probe_place,
     })
 
-# %%
 for epoch in range(num_epochs):
     full_train_indices = torch.randperm(num_games)
     for i in tqdm(range(0, num_games, batch_size)):
@@ -193,5 +188,3 @@ for epoch in range(num_epochs):
         optimiser.zero_grad()
 
 torch.save(linear_probe, f"probes/{probe_name}.pth")
-# %%
-# %%
