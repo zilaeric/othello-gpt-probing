@@ -1,3 +1,26 @@
+### Update 29/06/2023 ~ Instructions for running on LISA
+
+First, clone the repository and move to the corresponding directory by running:
+```
+git clone git@github.com:zilaeric/othello-gpt-probing.git
+cd othello-gpt-probing
+```
+
+Next, install the dependencies and download the necessary data (takes ~15 minutes) by running:
+```
+sbatch jobs/install_env.job
+```
+
+Finally, a probe with a ready-made `.job` file can be trained by running:
+```
+sbatch jobs/probe_6_hook_resid_post.job
+```
+
+In order to define and train a new probe, arguments `--layer` and `--place` must be set in line with the TransformerLens library definitions (arguments are subsequently combined as `f"block.{layer}.{place}"`). An example of training a probe into the sixth (`--layer 6`) self-attention block's final output (`--place "hook_resid_post"`) follows:
+```
+python mechanistic_interpretability/tl_probing_v1.py --layer 6 --place "hook_resid_post"
+```
+
 ### Update 02/13/2023 :fire::fire::fire:
 
 Neel Nanda just released a [TransformerLens](https://github.com/neelnanda-io/TransformerLens) version of Othello-GPT ([Colab](https://colab.research.google.com/github/neelnanda-io/TransformerLens/blob/main/demos/Othello_GPT.ipynb), [Repo Notebook](https://github.com/neelnanda-io/TransformerLens/blob/main/demos/Othello_GPT.ipynb)), boosting the mechanistic interpretability research of it. Based on his work, a tool was made to inspect each MLP neuron in Othello-GPT, e.g. see the differing activation for [neuron 255 in layer 3](https://kran.ai/othelloscope/L2/N255) and [neuron 250 in layer 8](https://kran.ai/othelloscope/L7/N250).
