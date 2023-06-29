@@ -130,6 +130,7 @@ optimiser = torch.optim.AdamW([linear_probe], lr=lr, betas=(0.9, 0.99), weight_d
 # %%
 wandb.init(
     project="othello",
+    name=probe_name,
     config={
         "layer": layer,
         "batch_size": batch_size,
@@ -183,7 +184,7 @@ for epoch in range(num_epochs):
         loss_all = -probe_correct_log_probs[2, :].mean(0).sum()
         
         loss = loss_even + loss_odd + loss_all
-        
+
         wandb.log({"loss": loss, "loss_even": loss_even, "loss_odd": loss_odd, "loss_all": loss_all})
         
         loss.backward() # it's important to do a single backward pass for mysterious PyTorch reasons, so we add up the losses - it's per mode and per square.
