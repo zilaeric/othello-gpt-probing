@@ -11,7 +11,17 @@ Next, install the dependencies and download the necessary data (takes ~15 minute
 sbatch jobs/install_env.job
 ```
 
-Finally, a probe with a ready-made `.job` file can be trained by running:
+Next, login to your [WandB](https://wandb.ai/) by activating the environment and inserting the requested information after running:
+```
+module purge
+module load 2021
+module load Anaconda3/2021.05
+
+source activate othello
+wandb login
+```
+
+Finally, a probe with a ready-made `.job` file can be trained, for example, by running:
 ```
 sbatch jobs/probe_6_hook_resid_post.job
 ```
