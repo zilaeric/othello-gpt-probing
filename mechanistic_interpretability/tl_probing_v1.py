@@ -167,6 +167,6 @@ for epoch in range(num_epochs):
         optimiser.step()
         optimiser.zero_grad()
 
-torch.save(linear_probe, f"mechanistic_interpretability/{probe_name}.pth")
+torch.save(linear_probe, f"probes/{probe_name}.pth")
 # %%
 # %%
